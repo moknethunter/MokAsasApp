@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MokAsas · Setup</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>body{font-family:'Cairo',sans-serif;background-color:#050814;background-image:radial-gradient(circle at 50% 0%,#0a1020 0%,#050814 100%);-webkit-user-select:none;user-select:none;}</style>
+</head>
+<body class="text-white h-screen flex items-center justify-center p-4 overflow-hidden">
+
+  <div class="w-full max-w-md bg-[#0a1020]/90 backdrop-blur-xl border border-[#142038] rounded-3xl p-8 shadow-2xl relative">
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#00d9ff] to-[#0066ff] rounded-t-3xl"></div>
+    
+    <div class="text-center mb-8">
+      <div class="w-24 h-24 mx-auto bg-gradient-to-br from-[#00d9ff] to-[#0066ff] rounded-3xl flex items-center justify-center text-5xl shadow-[0_0_40px_rgba(0,217,255,0.4)] mb-5 transform rotate-3">🌐</div>
+      <h1 class="text-3xl font-bold text-white tracking-wide">MokAsas</h1>
+      <p class="text-sm text-[#00d9ff] mt-2 font-mono">Network Client</p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm text-[#6b7794] mb-2">عنوان السيرفر (Server URL)</label>
+        <input type="url" id="server-url" placeholder="http://192.168.x.x:3000" value="http://192.168.1.5:3000" class="w-full bg-[#050814] border border-[#142038] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00d9ff] transition text-sm font-mono" dir="ltr">
+      </div>
+      <div>
+        <label class="block text-sm text-[#6b7794] mb-2">الملف السري (Secret Token)</label>
+        <input type="text" id="secret-token" placeholder="الصق الرمز السري هنا..." class="w-full bg-[#050814] border border-[#142038] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00d9ff] transition text-sm font-mono" dir="ltr">
+      </div>
+      
+      <button onclick="connectToServer()" class="w-full mt-4 bg-gradient-to-r from-[#00d9ff] to-[#0066ff] text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(0,217,255,0.4)] active:scale-95 transition-transform">اتصال بالشبكة</button>
+    </div>
+  </div>
+
+<script>
+  // التحقق من وجود جلسة سابقة
+  if (localStorage.getItem('token')) {
+    window.location.href = 'app.html';
+  }
+
+  async function connectToServer() {
+    const serverUrl = document.getElementById('server-url').value.trim().replace(/\/$/, "");
+    const secretToken = document.getElementById('secret-token').value.trim();
+    
+    if (!serverUrl || !secretToken) return alert("الرجاء إدخال رابط السيرفر والملف السري");
+
+    try {
+      const res = await fetch(`${serverUrl}/api/provision/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secretToken })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        localStorage.setItem('serverUrl', serverUrl);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('phone', data.phoneNumber);
+        localStorage.setItem('name', data.name);
+        window.location.href = 'app.html';
+      } else {
+        alert(data.error || "فشل الاتصال. تأكد من الرمز السري.");
+      }
+    } catch (e) {
+      alert("تعذر الوصول للسيرفر. تأكد من صحة الرابط وأن السيرفر يعمل.");
+    }
+  }
+</script>
+</body>
+</html>
